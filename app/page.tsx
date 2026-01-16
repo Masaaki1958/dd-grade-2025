@@ -18,6 +18,7 @@ function fmt(x: number | null, digits = 2): string {
 
 export default function Page() {
   const [form, setForm] = useState({
+
     isAF: false,
 
     // Mitral inflow
@@ -35,40 +36,50 @@ export default function Page() {
     // Confirmatory
     lavi: "",
     lars: "",
-    pvSD: "",
+    pvS: "",
+    pvD: "",
     ivrt: "",
 
     // AF-only
     dt: "",
     bmi: "",
   });
-
+  // Pulmonary vein S/D (computed from S and D)
+const pvSD = useMemo(() => {
+  const s = num(form.pvS);
+  const d = num(form.pvD);
+  if (s == null || d == null || d === 0) return null;
+  return Math.round((s / d) * 100) / 100;
+}, [form.pvS, form.pvD]);
   const [showTrace, setShowTrace] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const inputs: DDInputs = useMemo(
-    () => ({
-      isAF: form.isAF,
+  () => ({
+    isAF: form.isAF,
 
-      E: num(form.E),
-      A: num(form.A),
+    E: num(form.E),
+    A: num(form.A),
 
-      eSeptal: num(form.eSeptal),
-      eLateral: num(form.eLateral),
+    eSeptal: num(form.eSeptal),
+    eLateral: num(form.eLateral),
 
-      trVmax: num(form.trVmax),
-      pasp: num(form.pasp),
+    trVmax: num(form.trVmax),
+    pasp: num(form.pasp),
 
-      lavi: num(form.lavi),
-      lars: num(form.lars),
-      pvSD: num(form.pvSD),
-      ivrt: num(form.ivrt),
+    lavi: num(form.lavi),
+    lars: num(form.lars),
 
-      dt: num(form.dt),
-      bmi: num(form.bmi),
-    }),
-    [form]
-  );
+    pvS: num(form.pvS),
+    pvD: num(form.pvD),
+
+    ivrt: num(form.ivrt),
+
+    dt: num(form.dt),
+    bmi: num(form.bmi),
+  }),
+  [form]
+);
 
   const result = useMemo(() => computeDD2025(inputs), [inputs]);
 
@@ -93,7 +104,7 @@ export default function Page() {
     add("PASP", inputs.pasp, "mmHg");
     add("LAVI", inputs.lavi, "mL/m²");
     add("LARS", inputs.lars, "%");
-    add("Pulm vein S/D", inputs.pvSD, "");
+    add("Pulm vein S/D", result.derived.pvSD ?? null, "");
     if (!form.isAF) add("IVRT", inputs.ivrt, "ms");
     if (form.isAF) add("DT", inputs.dt, "ms");
     if (form.isAF) add("BMI", inputs.bmi, "kg/m²");
@@ -172,7 +183,8 @@ export default function Page() {
                   pasp: "",
                   lavi: "",
                   lars: "",
-                  pvSD: "",
+                  pvS: "",
+                  pvD: "",
                   ivrt: "",
                   dt: "",
                   bmi: "",
@@ -261,15 +273,6 @@ export default function Page() {
             />
 
             <Field
-              label="Pulmonary vein S/D"
-              hint={form.isAF ? "Secondary: positive if < 1" : "Confirmatory: positive if ≤ 0.67"}
-              v={form.pvSD}
-              s="pvSD"
-              setForm={setForm}
-              placeholder="e.g., 0.9"
-            />
-
-            <Field
               label="IVRT (ms)"
               hint="Confirmatory: positive if ≤ 70 (sinus rhythm)"
               v={form.ivrt}
@@ -278,6 +281,59 @@ export default function Page() {
               placeholder="e.g., 65"
               disabled={form.isAF}
             />
+            
+            {/* Pulmonary vein S & D (compute S/D) */}
+<div className="grid gap-2">
+  <div className="flex items-end justify-between gap-3">
+    <div>
+      <div className="text-sm font-medium text-gray-900">Pulmonary vein</div>
+      <div className="text-xs text-gray-500">
+        {form.isAF
+          ? "Secondary: positive if S/D < 1"
+          : "Confirmatory: positive if S/D ≤ 0.67"}
+      </div>
+    </div>
+
+    {pvSD == null ? (
+      <span className="text-xs text-gray-400">S/D —</span>
+    ) : (
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-medium text-gray-700">
+          S/D {fmt(pvSD, 2)}
+        </span>
+
+        <span
+          className={[
+            "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold",
+            (form.isAF ? pvSD < 1 : pvSD <= 0.67)
+              ? "bg-red-100 text-red-700"
+              : "bg-emerald-100 text-emerald-800",
+          ].join(" ")}
+          title={form.isAF ? "Abnormal if S/D < 1" : "Abnormal if S/D ≤ 0.67"}
+        >
+          {(form.isAF ? pvSD < 1 : pvSD <= 0.67) ? "Abnormal" : "Normal"}
+        </span>
+      </div>
+    )}
+  </div>
+
+  <div className="grid grid-cols-2 gap-3">
+    <Field
+      label="S (cm/s)"
+      v={form.pvS}
+      s="pvS"
+      setForm={setForm}
+      placeholder="e.g., 50"
+    />
+    <Field
+      label="D (cm/s)"
+      v={form.pvD}
+      s="pvD"
+      setForm={setForm}
+      placeholder="e.g., 60"
+    />
+  </div>
+</div>
 
             {/* AF-only fields */}
             {form.isAF && (

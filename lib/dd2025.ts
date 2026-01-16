@@ -14,7 +14,9 @@ export type DDInputs = {
 
   lavi: number | null; // mL/m^2
   lars: number | null; // %
-  pvSD: number | null; // ratio
+  pvS: number | null; // Pulmonary vein S (cm/s)
+  pvD: number | null; // Pulmonary vein D (cm/s)
+  pvSD?: number | null; // legacy ratio (optional)
   ivrt: number | null; // ms
 
   dt: number | null; // ms (AF)
@@ -31,16 +33,30 @@ export type DDResult = {
     EA: number | null;
     eAvg: number | null;
     EeAvg: number | null;
+    pvSD: number | null; // computed PV S/D
   };
 
   ruleTrace: string[];
-
-  // New: user guidance
   missing: string[];
 };
 
 export function computeDD2025(x: DDInputs): DDResult {
-  return x.isAF ? computeAF(x) : computeSinus(x);
+  // Prefer explicit pvSD if provided (legacy), otherwise compute from pvS/pvD
+  const computedPVSD =
+    x.pvSD != null
+      ? x.pvSD
+      : x.pvS != null && x.pvD != null && x.pvD !== 0
+        ? round2(x.pvS / x.pvD)
+        : null;
+
+  const x2: DDInputs = { ...x, pvSD: computedPVSD };
+
+  const r = x2.isAF ? computeAF(x2) : computeSinus(x2);
+
+  return {
+    ...r,
+    derived: { ...r.derived, pvSD: computedPVSD },
+  };
 }
 
 /* ============================
@@ -54,10 +70,12 @@ function computeSinus(x: DDInputs): DDResult {
   const eAvg = avg2(x.eSeptal, x.eLateral);
   const EeAvg = safeDiv(x.E, eAvg);
 
-  // Minimal missing checks (don’t be too strict; allow partial)
   if (x.E == null) missing.push("Mitral E (cm/s)");
   if (x.A == null) missing.push("Mitral A (cm/s) (needed for E/A)");
-  if (x.eSeptal == null && x.eLateral == null) missing.push("Septal and/or lateral e′ (cm/s)");
+  if (x.eSeptal == null && x.eLateral == null)
+    missing.push("Septal and/or lateral e′ (cm/s)");
+
+  const pvSD = x.pvSD ?? null;
 
   // Top 3 markers
   const reducedE =
@@ -65,9 +83,6 @@ function computeSinus(x: DDInputs): DDResult {
     (x.eLateral != null && x.eLateral <= 7) ||
     (eAvg != null && eAvg <= 6.5);
 
-  // NOTE: Your full guideline allows septal/lateral/avg E/e′ thresholds.
-  // Here we use avg only because this minimal engine stores EeAvg.
-  // If you want septal/lateral specific display later, we can add EeSeptal/EeLateral.
   const highEe = EeAvg != null && EeAvg >= 14;
 
   const highTR =
@@ -77,7 +92,6 @@ function computeSinus(x: DDInputs): DDResult {
   const nAbn = [reducedE, highEe, highTR].filter(Boolean).length;
   trace.push(`Top markers abnormal: ${nAbn}/3`);
 
-  // All normal
   if (nAbn === 0) {
     return pack(
       "Normal DF",
@@ -91,7 +105,6 @@ function computeSinus(x: DDInputs): DDResult {
     );
   }
 
-  // Reduced e′ only with E/A ≤ 0.8 -> Grade 1
   if (reducedE && !highEe && !highTR) {
     trace.push("Reduced e′ only branch");
     if (EA != null && EA <= 0.8) {
@@ -108,12 +121,12 @@ function computeSinus(x: DDInputs): DDResult {
     }
   }
 
-  // Confirm LAP (purple box)
+  // Confirm LAP
   const anyConfirmAvailable =
-    x.pvSD != null || x.lars != null || x.lavi != null || x.ivrt != null;
+    pvSD != null || x.lars != null || x.lavi != null || x.ivrt != null;
 
   const lap =
-    (x.pvSD != null && x.pvSD <= 0.67) ||
+    (pvSD != null && pvSD <= 0.67) ||
     (x.lars != null && x.lars <= 18) ||
     (x.lavi != null && x.lavi > 34) ||
     (x.ivrt != null && x.ivrt <= 70);
@@ -122,7 +135,7 @@ function computeSinus(x: DDInputs): DDResult {
     trace.push("No confirmatory variables available");
     return pack(
       "Indeterminate",
-      "Need ≥1 confirmatory variable (PV S/D, LARS, LAVI, or IVRT) to confirm LAP",
+      "Need ≥1 confirmatory variable (PV S & D, LARS, LAVI, or IVRT) to confirm LAP",
       "amber",
       EA,
       eAvg,
@@ -135,11 +148,9 @@ function computeSinus(x: DDInputs): DDResult {
   trace.push(lap ? "LAP elevated" : "LAP not elevated");
 
   if (!lap) {
-    // In your flowchart, some branches can be Normal LAP or Grade 1.
-    // Here we keep it conservative as Indeterminate if abnormal markers exist but LAP not elevated.
     return pack(
       "Indeterminate",
-      "Abnormal markers present but LAP not confirmed by PV S/D, LARS, LAVI, or IVRT",
+      "Abnormal markers present but LAP not confirmed by PV (S/D), LARS, LAVI, or IVRT",
       "amber",
       EA,
       eAvg,
@@ -149,7 +160,6 @@ function computeSinus(x: DDInputs): DDResult {
     );
   }
 
-  // Elevated LAP -> Grade depends on E/A
   if (EA == null) {
     return pack(
       "Increased LAP (grade unknown)",
@@ -198,52 +208,28 @@ function computeAF(x: DDInputs): DDResult {
   const eAvg = avg2(x.eSeptal, x.eLateral);
   const EeAvg = safeDiv(x.E, eAvg);
 
-  // Missing checks specific to AF primary criteria
   if (x.E == null) missing.push("Mitral E (cm/s)");
   if (x.eSeptal == null) missing.push("Septal e′ (cm/s) (for septal E/e′)");
   if (x.trVmax == null && x.pasp == null) missing.push("TR Vmax (m/s) or PASP (mmHg)");
   if (x.dt == null) missing.push("DT (ms)");
 
+  const pvSD = x.pvSD ?? null;
+
   let count = 0;
 
-  // 1) E ≥ 100
   if (x.E != null && x.E >= 100) count++;
-
-  // 2) septal E/e′ > 11
   if (x.E != null && x.eSeptal != null && x.eSeptal !== 0 && x.E / x.eSeptal > 11) count++;
-
-  // 3) TR > 2.8 or PASP > 35
   if ((x.trVmax != null && x.trVmax > 2.8) || (x.pasp != null && x.pasp > 35)) count++;
-
-  // 4) DT ≤ 160
   if (x.dt != null && x.dt <= 160) count++;
 
   trace.push(`AF criteria positive: ${count}/4`);
 
   if (count <= 1) {
-    return pack(
-      "Normal LAP",
-      "0–1 AF criteria positive",
-      "green",
-      null,
-      eAvg,
-      EeAvg,
-      trace,
-      missing
-    );
+    return pack("Normal LAP", "0–1 AF criteria positive", "green", null, eAvg, EeAvg, trace, missing);
   }
 
   if (count >= 3) {
-    return pack(
-      "Elevated LAP",
-      "≥3 AF criteria positive",
-      "red",
-      null,
-      eAvg,
-      EeAvg,
-      trace,
-      missing
-    );
+    return pack("Elevated LAP", "≥3 AF criteria positive", "red", null, eAvg, EeAvg, trace, missing);
   }
 
   // Exactly 2 positive → secondary criteria
@@ -254,9 +240,9 @@ function computeAF(x: DDInputs): DDResult {
     secAvail++;
     if (x.lars < 18) sec++;
   }
-  if (x.pvSD != null) {
+  if (pvSD != null) {
     secAvail++;
-    if (x.pvSD < 1) sec++;
+    if (pvSD < 1) sec++;
   }
   if (x.bmi != null) {
     secAvail++;
@@ -279,29 +265,11 @@ function computeAF(x: DDInputs): DDResult {
   }
 
   if (sec >= 2) {
-    return pack(
-      "Elevated LAP",
-      "2 AF criteria + ≥2 secondary criteria positive",
-      "red",
-      null,
-      eAvg,
-      EeAvg,
-      trace,
-      missing
-    );
+    return pack("Elevated LAP", "2 AF criteria + ≥2 secondary criteria positive", "red", null, eAvg, EeAvg, trace, missing);
   }
 
   if (sec === 0) {
-    return pack(
-      "Normal LAP",
-      "2 AF criteria + no secondary criteria positive",
-      "green",
-      null,
-      eAvg,
-      EeAvg,
-      trace,
-      missing
-    );
+    return pack("Normal LAP", "2 AF criteria + no secondary criteria positive", "green", null, eAvg, EeAvg, trace, missing);
   }
 
   return pack(
@@ -319,16 +287,20 @@ function computeAF(x: DDInputs): DDResult {
 /* ============================
    Utilities
    ============================ */
+function round2(x: number): number {
+  return Math.round(x * 100) / 100;
+}
+
 function safeDiv(a: number | null, b: number | null): number | null {
   if (a == null || b == null || b === 0) return null;
-  return Math.round((a / b) * 100) / 100;
+  return round2(a / b);
 }
 
 function avg2(a: number | null, b: number | null): number | null {
   if (a == null && b == null) return null;
   if (a == null) return b;
   if (b == null) return a;
-  return Math.round(((a + b) / 2) * 100) / 100;
+  return round2((a + b) / 2);
 }
 
 function pack(
@@ -345,7 +317,7 @@ function pack(
     gradeLabel,
     summary,
     badgeTone,
-    derived: { EA, eAvg, EeAvg },
+    derived: { EA, eAvg, EeAvg, pvSD: null },
     ruleTrace,
     missing,
   };
