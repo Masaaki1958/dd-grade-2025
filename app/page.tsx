@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { computeDD2025, type DDInputs } from "../lib/dd2025";
 
+const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? "dev";
+
 function num(x: string): number | null {
   const t = x.trim();
   if (t === "") return null;
@@ -152,6 +154,11 @@ const pvSD = useMemo(() => {
       <div className="mx-auto max-w-3xl space-y-6">
         <header className="space-y-1">
           <h1 className="text-2xl font-semibold">LV Diastolic Function (2025)</h1>
+
+          <div className="text-xs text-gray-500">
+             Version {APP_VERSION}
+          </div>
+
           <p className="text-sm text-gray-600">
             Educational tool. Not for clinical decision making.
           </p>
@@ -438,6 +445,27 @@ const pvSD = useMemo(() => {
         {/* Hidden preview: useful for debugging (optional) */}
         {/* <pre className="text-xs text-gray-500 whitespace-pre-wrap">{summaryText}</pre> */}
       </div>
+      <footer className="mt-10 border-t border-gray-200 pt-4 text-xs text-gray-500">
+  <div className="space-y-2">
+    <div className="font-medium text-gray-700">References</div>
+
+    <ul className="list-disc pl-5 space-y-1">
+      <li>
+        <a
+          href="https://pubmed.ncbi.nlm.nih.gov/27037982/"
+          target="_blank"
+          rel="noreferrer"
+          className="underline underline-offset-2 hover:text-gray-700"
+        >
+          Nagueh SF, et al. Recommendations for the Evaluation of Left Ventricular
+          Diastolic Function by Echocardiography (2016).
+        </a>
+      </li>
+    </ul>
+
+    <div>Version {APP_VERSION} • Educational use only.</div>
+  </div>
+</footer>
     </main>
   );
 }
@@ -460,14 +488,20 @@ function Field({
   disabled?: boolean;
 }) {
   return (
-    <label className={`space-y-1 ${disabled ? "opacity-60" : ""}`}>
+    <label className="space-y-1">
       <div className="flex items-baseline justify-between gap-2">
-        <span className="text-sm font-medium">{label}</span>
-        {hint && <span className="text-xs text-gray-500">{hint}</span>}
+       <span className={`text-sm font-medium ${disabled ? "text-gray-400" : ""}`}>
+  {label}
+</span>
+{hint && (
+  <span className={`text-xs ${disabled ? "text-gray-300" : "text-gray-500"}`}>
+    {hint}
+  </span>
+)}
       </div>
 
       <input
-        className="w-full border rounded-md px-3 py-2 outline-none focus:ring"
+        className="w-full border rounded-md px-3 py-2 outline-none focus:ring disabled:opacity-100 disabled:bg-white disabled:text-gray-900"
         value={v}
         onChange={(e) => setForm((f: any) => ({ ...f, [s]: e.target.value }))}
         placeholder={placeholder}
