@@ -452,18 +452,22 @@ const pvSD = useMemo(() => {
     <ul className="list-disc pl-5 space-y-1">
       <li>
         <a
-          href="https://pubmed.ncbi.nlm.nih.gov/27037982/"
+          href="https://doi.org/10.1016/j.echo.2025.03.011"
           target="_blank"
           rel="noreferrer"
           className="underline underline-offset-2 hover:text-gray-700"
         >
-          Nagueh SF, et al. Recommendations for the Evaluation of Left Ventricular
-          Diastolic Function by Echocardiography (2016).
+          Nagueh SF, Sanborn DY, Oh JK, et al. Recommendations for the
+          Evaluation of Left Ventricular Diastolic Function by Echocardiography
+          and for Heart Failure With Preserved Ejection Fraction Diagnosis:
+          An Update From the American Society of Echocardiography.
+          <em> J Am Soc Echocardiogr.</em> 2025;38:537–569.
+          doi:10.1016/j.echo.2025.03.011.
         </a>
       </li>
     </ul>
 
-    <div>Version {APP_VERSION} • Educational use only.</div>
+    <div>Version 0.1.2 • Educational use only.</div>
   </div>
 </footer>
     </main>
