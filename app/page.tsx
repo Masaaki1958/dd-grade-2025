@@ -467,7 +467,7 @@ const pvSD = useMemo(() => {
       </li>
     </ul>
 
-    <div>Version 0.1.2 • Educational use only.</div>
+    <div>Version {APP_VERSION} • Educational use only.</div>
   </div>
 </footer>
     </main>
