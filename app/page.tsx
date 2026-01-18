@@ -505,7 +505,9 @@ function Field({
       </div>
 
       <input
-        className="w-full border rounded-md px-3 py-2 outline-none focus:ring disabled:opacity-100 disabled:bg-white disabled:text-gray-900"
+        className="w-full border rounded-md px-3 py-2 outline-none focus:ring
+           text-gray-900 disabled:text-gray-900
+           disabled:opacity-100 disabled:bg-white"
         value={v}
         onChange={(e) => setForm((f: any) => ({ ...f, [s]: e.target.value }))}
         placeholder={placeholder}
