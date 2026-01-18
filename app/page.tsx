@@ -494,11 +494,12 @@ function Field({
   return (
     <label className="space-y-1">
       <div className="flex items-baseline justify-between gap-2">
-       <span className={`text-sm font-medium ${disabled ? "text-gray-400" : ""}`}>
-  {label}
-</span>
+       <span className={`text-sm font-medium ${disabled ? "text-gray-700" : "text-gray-900"}`}>
+        {label}
+       </span>
+
 {hint && (
-  <span className={`text-xs ${disabled ? "text-gray-300" : "text-gray-500"}`}>
+  <span className={`text-xs ${disabled ? "text-gray-600" : "text-gray-500"}`}>
     {hint}
   </span>
 )}
