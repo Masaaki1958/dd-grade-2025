@@ -167,14 +167,7 @@ const pvSD = useMemo(() => {
         {/* Inputs */}
         <section className="rounded-xl bg-white p-5 shadow space-y-4">
           <div className="flex items-center justify-between gap-4 flex-wrap">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={form.isAF}
-                onChange={(e) => setForm((s) => ({ ...s, isAF: e.target.checked }))}
-                className="h-4 w-4"
-              />
-             <label className="flex items-center gap-2">
+              <label className="flex items-center gap-2">
     <input
       type="checkbox"
       className="appearance-auto h-4 w-4 accent-blue-600"
