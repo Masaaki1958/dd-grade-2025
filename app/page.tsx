@@ -167,19 +167,34 @@ const pvSD = useMemo(() => {
         {/* Inputs */}
         <section className="rounded-xl bg-white p-5 shadow space-y-4">
           <div className="flex items-center justify-between gap-4 flex-wrap">
-              <label className="flex items-center gap-2">
-    <input
-      type="checkbox"
-      className="appearance-auto h-4 w-4 accent-blue-600"
-      checked={form.isAF}
-      onChange={(e) =>
-        setForm({ ...form, isAF: e.target.checked })
-      }
-    />
-    <span className="text-sm font-medium text-gray-900">
-      Atrial fibrillation
-    </span>
-  </label>
+           
+           <label className="flex items-center gap-2 cursor-pointer select-none">
+  {/* real checkbox (hidden, still accessible) */}
+  <input
+    type="checkbox"
+    checked={form.isAF}
+    onChange={(e) => setForm({ ...form, isAF: e.target.checked })}
+    className="sr-only"
+  />
+
+  {/* visible custom checkbox */}
+  <span
+    className={`h-5 w-5 rounded border flex items-center justify-center ${
+      form.isAF
+        ? "bg-blue-600 border-blue-600"
+        : "bg-white border-gray-400"
+    }`}
+    aria-hidden="true"
+  >
+    {form.isAF && (
+      <span className="text-white text-sm leading-none">✓</span>
+    )}
+  </span>
+
+  <span className="text-sm font-medium text-gray-900">
+    Atrial fibrillation
+  </span>
+</label>
 
             <button
               className="rounded-md border px-3 py-1.5 text-sm text-gray-900
