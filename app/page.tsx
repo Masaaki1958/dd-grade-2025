@@ -174,8 +174,18 @@ const pvSD = useMemo(() => {
                 onChange={(e) => setForm((s) => ({ ...s, isAF: e.target.checked }))}
                 className="h-4 w-4"
               />
-              <span className="text-sm font-medium text-gray-900">Atrial fibrillation</span>
-            </label>
+             <label className="flex items-center gap-2">
+    <input
+      type="checkbox"
+      checked={form.isAF}
+      onChange={(e) =>
+        setForm({ ...form, isAF: e.target.checked })
+      }
+    />
+    <span className="text-sm font-medium text-gray-900">
+      Atrial fibrillation
+    </span>
+  </label>
 
             <button
               className="rounded-md border px-3 py-1.5 text-sm text-gray-900

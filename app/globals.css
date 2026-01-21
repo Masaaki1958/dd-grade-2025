@@ -50,10 +50,13 @@ body {
 }
 
 /* Force iOS Safari to use your colors inside controls */
-input, textarea, select, button {
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select,
+button {
   color: var(--fg);
-  -webkit-text-fill-color: var(--fg); /* KEY for iOS */
-  opacity: 1; /* prevent “washed out” rendering */
+  -webkit-text-fill-color: var(--fg);
+  opacity: 1;
 }
 
 /* Disabled controls: prevent iOS auto-dimming */
@@ -67,8 +70,11 @@ input:disabled, textarea:disabled, select:disabled, button:disabled {
 ::placeholder { color: var(--placeholder); opacity: 1; }
 ::-webkit-input-placeholder { color: var(--placeholder); opacity: 1; }
 
-/* Optional: reduce native iOS styling interference */
-input, textarea, select, button {
+/* Optional: reduce native iOS styling interference (but keep checkbox/radio visible) */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select,
+button {
   -webkit-appearance: none;
   appearance: none;
 }
