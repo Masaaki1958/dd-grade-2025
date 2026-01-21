@@ -153,13 +153,13 @@ const pvSD = useMemo(() => {
     <main className="min-h-screen bg-gray-50 p-6">
       <div className="mx-auto max-w-3xl space-y-6">
         <header className="space-y-1">
-          <h1 className="text-2xl font-semibold">LV Diastolic Function (2025)</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">LV Diastolic Function (2025)</h1>
 
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-900">
              Version {APP_VERSION}
           </div>
 
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-800">
             Educational tool. Not for clinical decision making.
           </p>
         </header>
@@ -174,11 +174,14 @@ const pvSD = useMemo(() => {
                 onChange={(e) => setForm((s) => ({ ...s, isAF: e.target.checked }))}
                 className="h-4 w-4"
               />
-              <span className="text-sm font-medium">Atrial fibrillation</span>
+              <span className="text-sm font-medium text-gray-900">Atrial fibrillation</span>
             </label>
 
             <button
-              className="rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50"
+              className="rounded-md border px-3 py-1.5 text-sm text-gray-900
+           hover:bg-gray-50
+           disabled:opacity-100 disabled:text-gray-700
+           disabled:bg-gray-50 disabled:border-gray-300"
               onClick={() => {
                 setForm({
                   isAF: false,
@@ -294,7 +297,7 @@ const pvSD = useMemo(() => {
   <div className="flex items-end justify-between gap-3">
     <div>
       <div className="text-sm font-medium text-gray-900">Pulmonary vein</div>
-      <div className="text-xs text-gray-500">
+      <div className="text-xs text-gray-900">
         {form.isAF
           ? "Secondary: positive if S/D < 1"
           : "Confirmatory: positive if S/D ≤ 0.67"}
@@ -302,7 +305,7 @@ const pvSD = useMemo(() => {
     </div>
 
     {pvSD == null ? (
-      <span className="text-xs text-gray-400">S/D —</span>
+      <span className="text-xs text-gray-900">S/D —</span>
     ) : (
       <div className="flex items-center gap-2">
         <span className="text-xs font-medium text-gray-700">
@@ -378,10 +381,10 @@ const pvSD = useMemo(() => {
         {/* Result */}
         <section className="rounded-xl bg-white p-5 shadow space-y-3">
           <div className="flex items-center justify-between gap-4 flex-wrap">
-            <h2 className="font-semibold text-lg">Result</h2>
+            <h2 className="font-semibold text-lg text-gray-900">Result</h2>
 
             <div className="flex items-center gap-3">
-              <label className="flex items-center gap-2 text-sm text-gray-600">
+              <label className="flex items-center gap-2 text-sm text-gray-900">
                 <input
                   type="checkbox"
                   checked={showTrace}
@@ -392,7 +395,9 @@ const pvSD = useMemo(() => {
 
               <button
                 onClick={handleCopy}
-                className="rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50"
+                className="rounded-md border px-3 py-1.5 text-sm text-gray-900 hover:bg-gray-50
+           disabled:opacity-100 disabled:text-gray-700
+           disabled:bg-gray-50 disabled:border-gray-300"
                 title="Copy a summary to clipboard"
               >
                 {copied ? "Copied!" : "Copy summary"}
@@ -402,8 +407,8 @@ const pvSD = useMemo(() => {
             </div>
           </div>
 
-          <div className="text-2xl font-semibold">{result.gradeLabel}</div>
-          <p className="text-sm text-gray-700">{result.summary}</p>
+          <div className="text-2xl font-semibold text-gray-900">{result.gradeLabel}</div>
+          <p className="text-sm text-gray-800">{result.summary}</p>
 
           <div className="text-sm text-gray-800 flex flex-wrap gap-x-4 gap-y-1">
             {!form.isAF && (
@@ -433,7 +438,7 @@ const pvSD = useMemo(() => {
           {showTrace && result.ruleTrace.length > 0 && (
             <div className="pt-2">
               <div className="text-sm font-medium text-gray-800">Rule trace</div>
-              <ul className="list-disc pl-5 text-sm text-gray-600 mt-1 space-y-0.5">
+              <ul className="list-disc pl-5 text-sm text-gray-900 mt-1 space-y-0.5">
                 {result.ruleTrace.map((r, i) => (
                   <li key={i}>{r}</li>
                 ))}
@@ -443,9 +448,9 @@ const pvSD = useMemo(() => {
         </section>
 
         {/* Hidden preview: useful for debugging (optional) */}
-        {/* <pre className="text-xs text-gray-500 whitespace-pre-wrap">{summaryText}</pre> */}
+        {/* <pre className="text-xs text-gray-900 whitespace-pre-wrap">{summaryText}</pre> */}
       </div>
-      <footer className="mt-10 border-t border-gray-200 pt-4 text-xs text-gray-500">
+      <footer className="mt-10 border-t border-gray-200 pt-4 text-xs text-gray-900">
   <div className="space-y-2">
     <div className="font-medium text-gray-700">References</div>
 
@@ -499,7 +504,7 @@ function Field({
        </span>
 
 {hint && (
-  <span className={`text-xs ${disabled ? "text-gray-600" : "text-gray-500"}`}>
+  <span className={`text-xs ${disabled ? "text-gray-900" : "text-gray-900"}`}>
     {hint}
   </span>
 )}

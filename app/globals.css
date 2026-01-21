@@ -3,6 +3,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  color-scheme: light dark;
 }
 
 @theme inline {
@@ -23,4 +25,77 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+/* ============================
+   iOS Safari form text fixes
+   ============================ */
+
+:root {
+  /* add these (light mode defaults) */
+  --fg: var(--foreground);
+  --bg: var(--background);
+
+  /* choose slightly-muted text for disabled/help text */
+  --fg-muted: #444444;
+
+  /* placeholder color (don’t make it too light on iPhone) */
+  --placeholder: #6b7280; /* similar to Tailwind gray-500 */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fg-muted: #cfcfcf;
+    --placeholder: #9ca3af; /* gray-400 */
+  }
+}
+
+/* Force iOS Safari to use your colors inside controls */
+input, textarea, select, button {
+  color: var(--fg);
+  -webkit-text-fill-color: var(--fg); /* KEY for iOS */
+  opacity: 1; /* prevent “washed out” rendering */
+}
+
+/* Disabled controls: prevent iOS auto-dimming */
+input:disabled, textarea:disabled, select:disabled, button:disabled {
+  color: var(--fg-muted);
+  -webkit-text-fill-color: var(--fg-muted);
+  opacity: 1;
+}
+
+/* Placeholder: iOS sometimes adds opacity unless forced */
+::placeholder { color: var(--placeholder); opacity: 1; }
+::-webkit-input-placeholder { color: var(--placeholder); opacity: 1; }
+
+/* Optional: reduce native iOS styling interference */
+input, textarea, select, button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* iOS Safari: bump contrast for non-input UI text (labels, headings, helper text) */
+@supports (-webkit-touch-callout: none) {
+  :root {
+    --muted-text: #374151;   /* gray-700 */
+    --muted-text-2: #4b5563; /* gray-600 */
+  }
+
+  /* If your UI uses Tailwind muted grays, override them */
+  .text-slate-400, .text-gray-400 {
+    color: var(--muted-text-2) !important;
+  }
+
+  .text-slate-500, .text-gray-500 {
+    color: var(--muted-text) !important;
+  }
+
+  /* shadcn token */
+  .text-muted-foreground {
+    color: var(--muted-text) !important;
+  }
+
+  /* Prevent opacity-based washout */
+  .opacity-50, .opacity-60 {
+    opacity: 1 !important;
+  }
 }
