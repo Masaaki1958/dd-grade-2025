@@ -177,6 +177,7 @@ const pvSD = useMemo(() => {
              <label className="flex items-center gap-2">
     <input
       type="checkbox"
+      className="appearance-auto h-4 w-4 accent-blue-600"
       checked={form.isAF}
       onChange={(e) =>
         setForm({ ...form, isAF: e.target.checked })
@@ -190,9 +191,6 @@ const pvSD = useMemo(() => {
             <button
               className="rounded-md border px-3 py-1.5 text-sm text-gray-900
            hover:bg-gray-50
-           disabled:opacity-100 disabled:text-gray-700
-           disabled:bg-gray-50 disabled:border-gray-300"
-              onClick={() => {
                 setForm({
                   isAF: false,
                   E: "",

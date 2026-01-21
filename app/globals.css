@@ -105,3 +105,9 @@ button {
     opacity: 1 !important;
   }
 }
+/* Ensure checkboxes/radios are visible (override any appearance-none) */
+input[type="checkbox"],
+input[type="radio"] {
+  -webkit-appearance: auto !important;
+  appearance: auto !important;
+}
