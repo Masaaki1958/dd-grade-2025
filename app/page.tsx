@@ -196,31 +196,32 @@ const pvSD = useMemo(() => {
   </span>
 </label>
 
-            <button
-              className="rounded-md border px-3 py-1.5 text-sm text-gray-900
-           hover:bg-gray-50
-                setForm({
-                  isAF: false,
-                  E: "",
-                  A: "",
-                  eSeptal: "",
-                  eLateral: "",
-                  trVmax: "",
-                  pasp: "",
-                  lavi: "",
-                  lars: "",
-                  pvS: "",
-                  pvD: "",
-                  ivrt: "",
-                  dt: "",
-                  bmi: "",
-                });
-                setShowTrace(false);
-                setCopied(false);
-              }}
-            >
-              Reset
-            </button>
+<button
+  className="rounded-md border px-3 py-1.5 text-sm text-gray-900 hover:bg-gray-50"
+  onClick={() => {
+    setForm({
+      isAF: false,
+      E: "",
+      A: "",
+      eSeptal: "",
+      eLateral: "",
+      trVmax: "",
+      pasp: "",
+      lavi: "",
+      lars: "",
+      pvS: "",
+      pvD: "",
+      ivrt: "",
+      dt: "",
+      bmi: "",
+    });
+    setShowTrace(false);
+    setCopied(false);
+  }}
+>
+  Reset
+</button>
+
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
